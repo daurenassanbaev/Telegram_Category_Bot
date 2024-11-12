@@ -15,14 +15,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * Сервис для выгрузки категории из базы данных.
+ */
 @Service
 @RequiredArgsConstructor
 public class CategoryUploadService {
     private final CategoryRepository categoryRepository;
+
+    // Проверка, является ли файл валидным Excel файлом
     public boolean isValidExcelFile(MultipartFile file) {
         return Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
+    // Извлекаем категории из Excel файла
     public LinkedHashMap<String, String> getCategoriesFromExcelFile(InputStream inputStream) {
         LinkedHashMap<String, String> categories = new LinkedHashMap<>();
         try {
@@ -30,10 +36,12 @@ public class CategoryUploadService {
 
             XSSFSheet sheet = workbook.getSheet("Category Tree");
 
+            // Проверка наличия листа "Category Tree"
             if (sheet == null) {
                 throw new RuntimeException("Sheet 'Category Tree' not found in Excel file.");
             }
 
+            // Проходим по строкам в листе
             for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex);
 
@@ -54,26 +62,34 @@ public class CategoryUploadService {
         return categories;
     }
 
+    // Добавляем все категории из Excel файла в базу данных
     public String addAllCategories(LinkedHashMap<String, String> categories, Long chatId) {
         for (Map.Entry<String, String> element : categories.entrySet()) {
             String category = element.getKey();
             String parentCategory = element.getValue();
+
+            // Проверка существования категории в базе данных
             Optional<Category> categoryOptional = categoryRepository.findByNameAndChatId(category, chatId);
             if (categoryOptional.isEmpty()) {
                 if (parentCategory.equals("-")) {
+                    // Если родительская категория не указана, создаем корневую категорию
                     Category category1 = new Category();
                     category1.setName(category);
                     category1.setChatId(chatId);
                     categoryRepository.save(category1);
                     continue;
                 }
+
+                // Создаем категорию и связываем ее с родительской категорией
                 Category categoryToSave = new Category();
                 categoryToSave.setName(category);
                 categoryToSave.setChatId(chatId);
                 Category resultCategory = categoryRepository.save(categoryToSave);
                 Optional<Category> parentOptional = categoryRepository.findByNameAndChatId(parentCategory, chatId);
                 Category parentCategoryToEdit;
+
                 if (!parentOptional.isEmpty()) {
+                    // Если родительская категория существует, связываем с ней
                     resultCategory = categoryRepository.save(categoryToSave);
                     parentCategoryToEdit = parentOptional.get();
                     resultCategory.setParent(parentCategoryToEdit);
@@ -81,6 +97,7 @@ public class CategoryUploadService {
                     categoryRepository.save(resultCategory);
                     categoryRepository.save(parentCategoryToEdit);
                 } else {
+                    // Если родительской категории нет, создаем ее
                     parentCategoryToEdit = new Category();
                     parentCategoryToEdit.setName(parentCategory);
                     parentCategoryToEdit.setChatId(chatId);
@@ -94,9 +111,12 @@ public class CategoryUploadService {
                 if (parentCategory.equals("-")) {
                     continue;
                 }
-                Category childCategory = categoryOptional.get(); // earth
+
+                // Если категория уже существует, проверяем родительскую категорию
+                Category childCategory = categoryOptional.get();
                 Optional<Category> parentCategoryOpt = categoryRepository.findByNameAndChatId(parentCategory, chatId);
                 if (parentCategoryOpt.isEmpty()) {
+                    // Если родительской категории нет, создаем ее и связываем с дочерней категорией
                     Category toSaveParentCategory = new Category();
                     toSaveParentCategory.setName(parentCategory);
                     toSaveParentCategory.setChatId(chatId);
@@ -109,6 +129,7 @@ public class CategoryUploadService {
             }
         }
 
+        // Возвращаем сообщение об успешном добавлении категорий
         return "Successfully added " + categories.keySet().size() + " categories.";
     }
 }
