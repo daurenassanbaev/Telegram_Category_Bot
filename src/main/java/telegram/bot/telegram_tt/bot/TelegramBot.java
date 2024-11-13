@@ -1,6 +1,7 @@
 package telegram.bot.telegram_tt.bot;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -65,9 +66,10 @@ public class TelegramBot extends TelegramLongPollingBot {
             
             Пожалуйста, отправьте ваш файл, я с удовольствием обработаю его 😊
             """;
-
-    private static final String PHOTO_PATH = "/Users/daurenassanbaev/Downloads/telegram-tt/image/img.png";
-    private static final String PHOTO_PATH_1 = "/Users/daurenassanbaev/Downloads/telegram-tt/image/img_1.png";
+    @Value("${images.first}")
+    private static final String PHOTO_PATH = "/Users/daurenassanbaev/Desktop/untitled folder/Pandev-Telegram-Bot/image/img.png";
+    @Value("${images.second}")
+    private static final String PHOTO_PATH_1 = "/Users/daurenassanbaev/Desktop/untitled folder/Pandev-Telegram-Bot/image/img_1.png";
     private final Set<Long> waiting = new HashSet<>();
 
     public TelegramBot(String botName, String token, AddCategoryCommand addCategoryCommand, ViewCategoryCommand viewCategoryCommand, RemoveCategoryCommand removeCategoryCommand, UploadCommand uploadCommand, DownloadCommand downloadCommand, CategoryDownloadService categoryDownloadService, CategoryUploadService categoryUploadService) {

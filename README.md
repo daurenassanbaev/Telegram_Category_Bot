@@ -1,3 +1,7 @@
+
+
+
+
 # Управление иерархией категорий
 
 Это Telegram-бот, который позволяет пользователям создавать, просматривать и удалять дерево категорий. Бот также поддерживает работу с Excel-документами для загрузки и скачивания дерева категорий.
@@ -34,6 +38,8 @@
    SPRING_DATASOURCE_PASSWORD=YOUR_PASSWORD
    TG_BOT_NAME=YOUR_BOT_NAME
    TG_BOT_TOKEN=YOUR_BOT_TOKEN
+   PATH_TO_FIRST_IMAGE='./image/img.png'
+   PATH_TO_SECOND_IMAGE='./image/img_1.png'
    ```
 
     - Затем выполните команду для запуска:
