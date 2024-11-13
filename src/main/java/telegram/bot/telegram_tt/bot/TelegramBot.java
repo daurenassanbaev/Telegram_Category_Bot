@@ -67,9 +67,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             Пожалуйста, отправьте ваш файл, я с удовольствием обработаю его 😊
             """;
     @Value("${images.first}")
-    private static final String PHOTO_PATH = "/Users/daurenassanbaev/Desktop/untitled folder/Pandev-Telegram-Bot/image/img.png";
+    private String PHOTO_PATH;
     @Value("${images.second}")
-    private static final String PHOTO_PATH_1 = "/Users/daurenassanbaev/Desktop/untitled folder/Pandev-Telegram-Bot/image/img_1.png";
+    private String PHOTO_PATH_1;
     private final Set<Long> waiting = new HashSet<>();
 
     public TelegramBot(String botName, String token, AddCategoryCommand addCategoryCommand, ViewCategoryCommand viewCategoryCommand, RemoveCategoryCommand removeCategoryCommand, UploadCommand uploadCommand, DownloadCommand downloadCommand, CategoryDownloadService categoryDownloadService, CategoryUploadService categoryUploadService) {

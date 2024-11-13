@@ -11,8 +11,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       TG_BOT_NAME: ${TG_BOT_NAME}
       TG_BOT_TOKEN: ${TG_BOT_TOKEN}
-      PATH_TO_FIRST_IMAGE: ${PATH_TO_FIRST_IMAGE}
-      PATH_TO_SECOND_IMAGE: ${PATH_TO_SECOND_IMAGE}
+      PATH_TO_FIRST_IMAGE: /app/img.png
+      PATH_TO_SECOND_IMAGE: /app/img_1.png
     depends_on:
       - db
     ports:
