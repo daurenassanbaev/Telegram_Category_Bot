@@ -1,51 +1,47 @@
+# Managing category hierarchy
 
+This is a Telegram bot that allows users to create, view, and delete a category tree. The bot also supports working with Excel documents to upload and download the category tree.
 
-
-
-# Управление иерархией категорий
-
-Это Telegram-бот, который позволяет пользователям создавать, просматривать и удалять дерево категорий. Бот также поддерживает работу с Excel-документами для загрузки и скачивания дерева категорий.
-
-## Используемые технологии
+## Technologies used
 - **Java**
 - **Spring Boot**
-- **Postgres + Flyway** (для миграций базы данных)
-- **Maven** (для сборки проекта)
+- **Postgres + Flyway** (for database migrations)
+- **Maven** (for building the project)
 
-## Основные функциональные возможности
+## Main functionality
 
-- **/viewTree** — отображает дерево категорий в структурированном виде.
-- **/addElement <название элемента>** — добавляет новый элемент. Если не указан родитель, элемент становится корневым.
-- **/addElement <родительский элемент> <дочерний элемент>** — добавляет дочерний элемент к указанному родителю. Если родительский элемент не найден, выводится соответствующее сообщение.
-- **/removeElement <название элемента>** — удаляет указанный элемент и все его дочерние элементы. Если элемент не найден, выводится соответствующее сообщение.
-- **/help** — отображает список доступных команд с их кратким описанием.
-- **/download** — скачивает Excel-документ с деревом категорий.
-- **/upload** — принимает Excel-документ с деревом категорий и сохраняет все элементы в базе данных.
+- **/viewTree** — displays the category tree in a structured form.
+- **/addElement <element name>** — adds a new element. If the parent is not specified, the element becomes the root.
+- **/addElement <parent element> <child element>** — adds a child element to the specified parent. If the parent element is not found, a corresponding message is displayed.
+- **/removeElement <element name>** — removes the specified element and all its children. If the element is not found, a corresponding message is displayed.
+- **/help** — displays a list of available commands with their brief description.
+- **/download** — downloads an Excel document with a category tree.
+- **/upload** — accepts an Excel document with a category tree and saves all elements in the database.
 
-## Запуск
+## Run
 
-1. Выполните команду для сборки проекта:
+1. Run the command to build the project:
 ```bash
 ./mvnw clean package -DskipTests
 ```
 
-2. Чтобы запустить проект с помощью Docker Compose:
+2. To run the project with Docker Compose:
 
-    - Сначала создайте файл `.env` и укажите в нем настройки:
-   ```bash
-   SPRING_DATASOURCE_URL=YOUR_URL
-   SPRING_DATASOURCE_USERNAME=YOUR_USERNAME
-   SPRING_DATASOURCE_PASSWORD=YOUR_PASSWORD
-   TG_BOT_NAME=YOUR_BOT_NAME
-   TG_BOT_TOKEN=YOUR_BOT_TOKEN
-   ```
+- First, create a `.env` file and specify the settings in it:
+```bash
+SPRING_DATASOURCE_URL=YOUR_URL
+SPRING_DATASOURCE_USERNAME=YOUR_USERNAME
+SPRING_DATASOURCE_PASSWORD=YOUR_PASSWORD
+TG_BOT_NAME=YOUR_BOT_NAME
+TG_BOT_TOKEN=YOUR_BOT_TOKEN
+```
 
-    - Затем выполните команду для запуска:
-   ```bash
-   docker-compose --env-file .env up --build
-   ```
+- Then run the command to run:
+```bash
+docker-compose --env-file .env up --build
+```
 
-## Примечания
+## Notes
 
-- Убедитесь, что у вас установлен Docker и Docker Compose.
-- Для работы с PostgreSQL необходимо настроить подключение к базе данных в `.env` файле.
+- Make sure you have Docker installed and Docker Compose.
+- To work with PostgreSQL, you need to configure a database connection in the `.env` file.
