@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.LinkedHashMap;
 
 /**
- * Команда для загрузки категорий из Excel-файла.
+ * Command to upload categories from an Excel file.
  */
 @Component
 @RequiredArgsConstructor
@@ -20,32 +20,32 @@ public class UploadCommand implements FileCommand {
     private final CategoryFacade categoryFacade;
 
     /**
-     * Выполняет команду загрузки категорий из файла.
+     * Executes the command to upload categories from a file.
      *
-     * @param inputStream поток входного файла
-     * @param chatId идентификатор чата пользователя
-     * @return ответное сообщение, указывающее на успех или неудачу
-     * @throws IOException если возникает ошибка при обработке файла
+     * @param inputStream the input file stream
+     * @param chatId the user's chat ID
+     * @return a response message indicating success or failure
+     * @throws IOException if there is an error processing the file
      */
     @Override
     public String executeFile(InputStream inputStream, Long chatId) throws IOException {
         log.info("Executing upload command for chat ID: {}", chatId);
 
-        // Получаем категории из загруженного Excel файла
+        // Get categories from the uploaded Excel file
         LinkedHashMap<String, String> map = categoryFacade.getCategoriesFromExcelFile(inputStream);
         log.debug("Categories loaded from file: {}", map);
 
-        // Добавляем все категории в базу данных
+        // Add all categories to the database
         String response = categoryFacade.addAllCategories(map, chatId);
         log.info("Categories successfully uploaded for chat ID: {}", chatId);
         return response;
     }
 
     /**
-     * Этот метод не используется в данном контексте.
+     * This method is not used in this context.
      *
-     * @param command полный текст команды
-     * @param chatId идентификатор чата пользователя
+     * @param command the full text of the command
+     * @param chatId the user's chat ID
      * @return null
      */
     @Override

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-// Здесь используется Factory Method Pattern
+// Factory Method Pattern is used here
 @Component
 public class DefaultCommandResponseFactory implements CommandResponseFactory {
     private static final String UPLOAD_MESSAGE = """

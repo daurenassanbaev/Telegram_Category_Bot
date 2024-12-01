@@ -7,7 +7,7 @@ import telegram.bot.telegram_tt.facade.CategoryFacade;
 import telegram.bot.telegram_tt.service.CategoryService;
 
 /**
- * Команда для добавления категории, как корневой или как дочерней по отношению к существующему родителю.
+ * Command to add a category, either as root or as a child of an existing parent.
  */
 @Component
 @RequiredArgsConstructor
@@ -17,11 +17,11 @@ public class AddCategoryCommand implements Command {
     private final CategoryFacade categoryFacade;
 
     /**
-     * Выполняет команду добавления категории.
+     * Executes the add category command.
      *
-     * @param command полный текст команды
-     * @param chatId идентификатор чата пользователя
-     * @return ответное сообщение, указывающее на успех или неудачу
+     * @param command full command text
+     * @param chatId user chat ID
+     * @return response message indicating success or failure
      */
     @Override
     public String execute(String command, Long chatId) {
@@ -37,22 +37,23 @@ public class AddCategoryCommand implements Command {
             String parent = extractParent(args, chatId);
             if (parent == null) {
                 log.warn("Parent category does not exist for chat ID: {}", chatId);
-                return "Родительская категория не существует.";
+                return "Parent category does not exist.";
             }
             String child = extractChild(args);
             log.info("Child category '{}' added successfully under parent '{}' for chat ID: {}", child, parent, chatId);
             return categoryFacade.addChildCategory(parent, child, chatId);
         } else {
             log.error("Invalid command format for chat ID: {}. Command: {}", chatId, command);
-            return "Неверный формат. Используйте /addElement <parent> <child> или /addElement <root>.";
+            return "Invalid format. Use /addElement <parent> <child> or /addElement <root>.";
         }
     }
+
     /**
-     * Извлекает родительскую категорию из аргументов команды.
+     * Extracts the parent category from the command arguments.
      *
-     * @param args аргументы команды
-     * @param chatId идентификатор чата
-     * @return родительская категория, если она существует, в противном случае null
+     * @param args command arguments
+     * @param chatId the chat identifier
+     * @return the parent category if it exists, otherwise null
      */
     private String extractParent(String[] args, Long chatId) {
         StringBuilder parentBuilder = new StringBuilder();
@@ -67,10 +68,10 @@ public class AddCategoryCommand implements Command {
     }
 
     /**
-     * Извлекает дочернюю категорию из аргументов команды.
+     * Extracts the child category from the command arguments.
      *
-     * @param args аргументы команды
-     * @return дочерняя категория как строка
+     * @param args command arguments
+     * @return the child category as a string
      */
     private String extractChild(String[] args) {
         StringBuilder childBuilder = new StringBuilder();

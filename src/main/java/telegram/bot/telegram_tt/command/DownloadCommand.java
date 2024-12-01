@@ -12,7 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
- * Команда для загрузки всех категорий из базы данных.
+ * Command to download all categories from the database.
  */
 @Component
 @RequiredArgsConstructor
@@ -22,11 +22,11 @@ public class DownloadCommand implements Command {
     private final CategoryFacade categoryFacade;
 
     /**
-     * Выполняет команду загрузки категорий.
+     * Executes the download categories command.
      *
-     * @param command полный текст команды
-     * @param chatId идентификатор чата пользователя
-     * @return возвращает все данные из базы данных в виде файла .xlsx
+     * @param command the full command text
+     * @param chatId the user's chat ID
+     * @return returns all data from the database as an .xlsx file
      */
     @Override
     public SendDocument execute(String command, Long chatId) {
@@ -38,13 +38,13 @@ public class DownloadCommand implements Command {
         try {
             log.debug("Attempting to create the Excel file for chat ID: {}", chatId);
 
-            // Создаем файл Excel с категориями с помощью сервиса
+            // Create an Excel file with categories using the service
             byte[] excelFile = categoryFacade.createCategoryTreeExcel(chatId);
 
-            // Преобразуем массив байтов в InputStream для документа
+            // Convert the byte array into an InputStream for the document
             ByteArrayInputStream inputStream = new ByteArrayInputStream(excelFile);
 
-            // Подготавливаем объект SendDocument для отправки файла Excel
+            // Prepare the SendDocument object to send the Excel file
             SendDocument sendDocument = new SendDocument();
             sendDocument.setChatId(chatId);
             sendDocument.setDocument(new InputFile(inputStream, "AllCategoriesTree.xlsx"));
@@ -52,10 +52,10 @@ public class DownloadCommand implements Command {
             log.info("Excel file successfully created for chat ID: {}", chatId);
             return sendDocument;
         } catch (IOException e) {
-            // Запишите ошибку с подробностями
+            // Log the error with details
             log.error("Failed to generate Excel document for chat ID: {}", chatId, e);
 
-            // Возвращает null или ответ об ошибке
+            // Return null or an error response
             return null;
         }
     }

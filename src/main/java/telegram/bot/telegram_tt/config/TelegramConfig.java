@@ -14,25 +14,26 @@ import telegram.bot.telegram_tt.service.CategoryDownloadService;
 import telegram.bot.telegram_tt.service.CategoryUploadService;
 
 /**
- * Конфигурационный класс для инициализации Telegram бота.
+ * Configuration class for initializing Telegram bot.
  */
 @Configuration
 @Slf4j
 public class TelegramConfig {
 
     /**
-     * Бин для создания и регистрации Telegram бота.
+     * Bin for creating and registering a Telegram bot.
      *
-     * @param botName имя бота
-     * @param token токен бота
-     * @param addCategoryCommand команда добавления категории
-     * @param viewCategoryCommand команда для просмотра категорий
-     * @param removeCategoryCommand команда для удаления категории
-     * @param uploadCommand команда для загрузки данных
-     * @param downloadCommand команда для скачивания данных
-     * @param categoryDownloadService сервис для скачивания категорий
-     * @param categoryUploadService сервис для загрузки категорий
-     * @return TelegramBot экземпляр бота
+     * @param botName bot name
+     * @param token bot token
+     * @param addCategoryCommand command to add a category
+     * @param viewCategoryCommand command to view categories
+     * @param removeCategoryCommand command to delete a category
+     * @param uploadCommand command to upload data
+     * @param downloadCommand command to download data
+     * @param categoryDownloadService service to download categories
+     * @param categoryUploadService service to upload categories
+     * @param defaultCommandResponseFactory factory for getting default commands
+     * @return TelegramBot bot instance
      */
     @Bean
     public TelegramBot telegramBot(@Value("${bot.name}") String botName,
@@ -47,18 +48,15 @@ public class TelegramConfig {
                                    DefaultCommandResponseFactory defaultCommandResponseFactory) {
         log.info("Initializing Telegram bot with name: {}", botName);
 
-        // Создание экземпляра бота с необходимыми командами и сервисами
         TelegramBot telegramBot = new TelegramBot(botName, token, addCategoryCommand, viewCategoryCommand,
                 removeCategoryCommand, uploadCommand, downloadCommand,
                 categoryDownloadService, categoryUploadService, defaultCommandResponseFactory);
 
         try {
-            // Регистрация бота в Telegram API
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBot);
             log.info("Telegram bot registered successfully.");
         } catch (TelegramApiException e) {
-            // Логирование ошибки регистрации бота
             log.error("Exception during Telegram bot registration: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to register Telegram bot.", e);
         }

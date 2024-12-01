@@ -12,7 +12,7 @@ import java.util.Optional;
 
 
 /**
- * Сервис для добавления, удаления и получения категории из базы данных.
+ * Service for adding, removing, and retrieving categories from the database.
  */
 @Service
 @RequiredArgsConstructor
@@ -22,11 +22,11 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     /**
-     * Добавление корневой категории.
+     * Adding a root category.
      *
-     * @param name  имя категории
-     * @param chatId идентификатор чата
-     * @return сообщение о результате
+     * @param name  category name
+     * @param chatId chat identifier
+     * @return result message
      */
     @Override
     @Transactional
@@ -36,7 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
         boolean check = categoryRepository.findByNameAndChatId(name, chatId).isPresent();
         if (check) {
             log.warn("Category with name {} already exists for chatId: {}", name, chatId);
-            return "Category with name " + name + " is already exists. Please type another name for root category.";
+            return "Category with name " + name + " already exists. Please enter another name for the root category.";
         }
         Category category = createCategory(name, chatId);
         categoryRepository.save(category);
@@ -45,11 +45,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * Создает новую категорию.
+     * Creates a new category.
      *
-     * @param name  имя категории
-     * @param chatId идентификатор чата
-     * @return новая категория
+     * @param name  category name
+     * @param chatId chat identifier
+     * @return new category
      */
     public Category createCategory(String name, Long chatId) {
         return Category.builder()
@@ -59,12 +59,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * Добавление дочерней категории.
+     * Adding a child category.
      *
-     * @param name  имя родительской категории
-     * @param child имя дочерней категории
-     * @param chatId идентификатор чата
-     * @return сообщение о результате
+     * @param name  parent category name
+     * @param child child category name
+     * @param chatId chat identifier
+     * @return result message
      */
     @Override
     @Transactional
@@ -84,11 +84,13 @@ public class CategoryServiceImpl implements CategoryService {
         Category parentCategory = parentOpt.get();
         Category childCategory = findOrCreateChildCategory(child, chatId);
 
+        // Checking if the child category is already assigned to the same parent category
         if (childCategory.getParent() != null && childCategory.getParent().getId().equals(parentCategory.getId())) {
             log.warn("The category {} is already a child of the parent category {} for chatId: {}", child, name, chatId);
             return "Please enter a valid category.";
         }
 
+        // Setting the parent-child relationship and saving the changes
         childCategory.setParent(parentCategory);
         parentCategory.getChildren().add(childCategory);
         categoryRepository.save(childCategory);
@@ -97,23 +99,23 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * Находит или создает дочернюю категорию.
+     * Finds or creates a child category.
      *
-     * @param child имя дочерней категории
-     * @param chatId идентификатор чата
-     * @return найденная или созданная дочерняя категория
+     * @param child child category name
+     * @param chatId chat identifier
+     * @return found or created child category
      */
     private Category findOrCreateChildCategory(String child, Long chatId) {
         return categoryRepository.findByNameAndChatId(child, chatId)
-                .orElseGet(() -> createCategory(child, chatId));
+                .orElseGet(() -> createCategory(child, chatId)); // Uses Factory Pattern
     }
 
     /**
-     * Удаление категории.
+     * Removing a category.
      *
-     * @param name  имя категории
-     * @param chatId идентификатор чата
-     * @return сообщение о результате
+     * @param name  category name
+     * @param chatId chat identifier
+     * @return result message
      */
     @Override
     @Transactional
@@ -124,7 +126,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryOpt.isPresent()) {
             Category category = categoryOpt.get();
 
-            // Удаление категории из списка детей родителя, если категория имеет родителя
+            // Removing the category from the parent's list of children if the category has a parent
             if (category.getParent() != null) {
                 category.getParent().getChildren().remove(category);
                 categoryRepository.save(category.getParent());
@@ -135,15 +137,15 @@ public class CategoryServiceImpl implements CategoryService {
             return "Successfully removed category with name: " + name;
         }
         log.warn("Category with name {} does not exist for chatId: {}", name, chatId);
-        return "Category with name " + name + " does not exist. Please type exists category.";
+        return "Category with name " + name + " does not exist. Please enter an existing category.";
     }
 
     /**
-     * Проверка существования категории.
+     * Checking if the category exists.
      *
-     * @param name  имя категории
-     * @param chatId идентификатор чата
-     * @return true, если категория существует, иначе false
+     * @param name  category name
+     * @param chatId chat identifier
+     * @return true if the category exists, otherwise false
      */
     @Override
     public boolean categoryExists(String name, Long chatId) {
@@ -151,10 +153,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * Получение списка корневых категорий для данного чата.
+     * Retrieving the list of root categories for the given chat.
      *
-     * @param chatId идентификатор чата
-     * @return список корневых категорий
+     * @param chatId chat identifier
+     * @return list of root categories
      */
     @Override
     public List<Category> findByParentIsNullAndChatId(Long chatId) {
@@ -162,10 +164,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * Просмотр дерева категорий для данного чата.
+     * Viewing the category tree for the given chat.
      *
-     * @param chatId идентификатор чата
-     * @return дерево категорий в виде строки
+     * @param chatId chat identifier
+     * @return category tree as a string
      */
     @Override
     public String viewCategoryTree(Long chatId) {
@@ -185,16 +187,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * Рекурсивно строит дерево категорий.
+     * Recursively builds the category tree.
      *
-     * @param category категория для записи
-     * @param builder строковый билдер для дерева
-     * @param level уровень вложенности
+     * @param category category to be recorded
+     * @param builder string builder for the tree
+     * @param level current level of nesting
      */
     private void buildTree(Category category, StringBuilder builder, int level) {
         builder.append("    ".repeat(level)).append("-   ").append(category.getName()).append("\n");
         for (Category child : category.getChildren()) {
-            buildTree(child, builder, level + 1);
+            buildTree(child, builder, level + 1); // Recursive call, part of the Composite Pattern
         }
     }
 }

@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Бот Telegram для управления деревьями категорий.
- * Поддерживает добавление, просмотр, удаление категорий и загрузку/выгрузку деревьев категорий.
+ * Telegram bot for managing category trees.
+ * Supports adding, viewing, deleting categories and uploading/downloading category trees.
  */
 @Slf4j
 public class TelegramBot extends TelegramLongPollingBot {
@@ -60,24 +60,23 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (message.hasText()) {
                 String messageText = message.getText();
                 String response = "";
-                // Обрабатываем команду help
                 if (messageText.equals("/help")) {
                     response = commandResponseFactory.createResponse(messageText);
                 } else if (messageText.equals("/start")) {
                     response = commandResponseFactory.createResponse(messageText);
                 } else if (messageText.equals("/upload")) {
                     response = commandResponseFactory.createResponse(messageText);
-                    waiting.add(chatId); // Ожидаем загрузку файла от пользователя
+                    waiting.add(chatId); // Wait for the user to upload a file
                 } else {
-                    // Обработка других команд
+                    // Processing other commands
                     Object responseObject = handleCommand(messageText, chatId);
                     if (responseObject instanceof SendDocument) {
                         try {
                             execute((SendDocument) responseObject);
                             return;
                         } catch (TelegramApiException e) {
-                            log.error("Ошибка отправки документа: ", e);
-                            response = "Ошибка отправки документа. Попробуйте еще раз.";
+                            log.error("Error sending document: ", e);
+                            response = "Error sending document. Try again.";
                         }
                     } else {
                         response = (String) responseObject;
@@ -85,7 +84,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 sendMessage(chatId, response);
             } else if (update.getMessage().hasDocument() && waiting.contains(chatId)) {
-                waiting.remove(chatId); // Убираем пользователя из списка ожидания
+                waiting.remove(chatId); // Remove the user from the waiting list
                 String fileId = message.getDocument().getFileId();
                 GetFile getFileMethod = new GetFile(fileId);
                 try {
@@ -98,18 +97,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                             inputStream.close();
                             sendMessage(chatId, response);
                         } else {
-                            sendMessage(chatId, "Команда загрузки настроена неправильно.");
+                            sendMessage(chatId, "The boot command is not configured correctly.");
                         }
                     } else {
-                        sendMessage(chatId, "Ошибка: Пожалуйста, загрузите файл в формате Excel (.xls или .xlsx).");
+                        sendMessage(chatId, "Error: Please upload a file in Excel format (.xls or .xlsx).");
                     }
 
                 } catch (TelegramApiException | IOException e) {
-                    log.error("Ошибка при загрузке или обработке файла", e);
-                    sendMessage(chatId, "Произошла ошибка при загрузке файла. Попробуйте позже.");
+                    log.error("Error loading or processing file", e);
+                    sendMessage(chatId, "There was an error loading the file. Please try again later.");
                 }
             } else {
-                sendMessage(chatId, "Некорректная команда. Список комманд вы можете узнать через команду /help");
+                sendMessage(chatId, "Incorrect command. You can find the list of commands using the /help command");
             }
         }
     }
@@ -123,11 +122,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
     /**
-     * Обрабатывает входящую команду на основе карты команд.
+     * Processes an incoming command based on the command map.
      *
-     * @param messageText текст команды
-     * @param chatId идентификатор чата
-     * @return ответное сообщение
+     * @param messageText command text
+     * @param chatId chat ID
+     * @return response message
      */
     private Object handleCommand(String messageText, Long chatId) {
         for (String commandKey : commands.keySet()) {
@@ -140,8 +139,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     return forReturn.toString();
                 } catch (Exception e) {
-                    log.error("Ошибка выполнения команды: ", e);
-                    return "Ошибка выполнения команды. Попробуйте еще раз.";
+                    log.error("Error executing command: ", e);
+                    return "Error executing command. Try again.";
                 }
             }
         }
@@ -151,25 +150,25 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
     /**
-     * Отправляет сообщение в определенный чат.
+     * Sends a message to a specific chat.
      *
-     * @param chatId идентификатор чата
-     * @param text текст сообщения
+     * @param chatId chat ID
+     * @param text message text
      */
     private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
         try {
-            if (text.equals("/upload")) {
-                sendPhoto(chatId, PHOTO_PATH); // Отправляем фото для загрузки
+            if (text.equals(commandResponseFactory.createResponse("/upload"))) {
+                sendPhoto(chatId, PHOTO_PATH);
                 sendPhoto(chatId, PHOTO_PATH_1);
             }
-            execute(message); // Отправляем сообщение
+            execute(message); // Sending a message
         } catch (TelegramApiException e) {
-            log.error("Ошибка отправки сообщения: ", e);
-            // Если ошибка при отправке сообщения, отправляем текст с ошибкой пользователю
-            sendMessage(chatId, "Произошла ошибка при отправке сообщения. Попробуйте позже.");
+            log.error("Error sending message: ", e);
+            // If there is an error sending the message, send the text with the error to the user
+            sendMessage(chatId, "There was an error sending your message. Try again later.");
         }
     }
     private void sendPhoto(long chatId, String photoPath) {
@@ -179,8 +178,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(sendPhoto);
         } catch (TelegramApiException e) {
-            log.error("Ошибка при отправке фото: ", e);
-            throw new RuntimeException("Ошибка при отправке фото.");
+            log.error("Error sending photo: ", e);
+            throw new RuntimeException("Error sending photo.");
         }
     }
 

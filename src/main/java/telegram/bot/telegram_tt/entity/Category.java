@@ -3,54 +3,53 @@ package telegram.bot.telegram_tt.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import telegram.bot.telegram_tt.composite.CategoryComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Сущность для представления категории в базе данных.
- * Маппинг на таблицу category в базе данных.
+ * Entity to represent a category in the database.
+ * Mapping to the category table in the database.
  */
 
-// Здесь используется Builder Pattern
+// This uses the Builder Pattern
 @Entity
 @Table(name = "category")
 @Getter
 @Setter
-public class Category implements CategoryComponent {
+public class Category {
 
     /**
-     * Идентификатор категории (первичный ключ).
-     * Генерация значения происходит автоматически.
+     * Category ID (primary key).
+     * Value is generated automatically.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Название категории.
+     * Category name.
      */
     private String name;
 
     /**
-     * Идентификатор чата, с которым связана категория.
+     * The ID of the chat the category is associated with.
      */
     private Long chatId;
 
     /**
-     * Родительская категория.
-     * Связь Many-to-One, т.е. одна категория может иметь одного родителя.
+     * Parent category.
+     * Many-to-One relationship, i.e. one category can have one parent.
      */
     @ManyToOne
     private Category parent;
 
     /**
-     * Список дочерних категорий.
-     * Связь One-to-Many, т.е. одна категория может иметь несколько дочерних категорий.
-     * CascadeType.ALL означает, что все операции с родителем будут касаться и дочерних категорий.
-     * orphanRemoval = true означает, что если дочерняя категория больше не связана с родителем, она будет удалена.
-     * FetchType.EAGER означает, что дочерние категории будут загружаться сразу при загрузке родительской категории.
+     * List of child categories.
+     * One-to-Many relationship, i.e. one category can have several child categories.
+     * CascadeType.ALL means that all operations with the parent will also affect the child categories.
+     * orphanRemoval = true means that if the child category is no longer associated with the parent, it will be removed.
+     * FetchType.EAGER means that the child categories will be loaded immediately when the parent category is loaded.
      */
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Category> children = new ArrayList<>();
@@ -69,13 +68,6 @@ public class Category implements CategoryComponent {
 
     public static CategoryBuilder builder() {
         return new CategoryBuilder();
-    }
-
-    @Override
-    public void addChild(CategoryComponent child) {
-        if (child instanceof Category) {
-            this.children.add((Category) child);
-        }
     }
 
 

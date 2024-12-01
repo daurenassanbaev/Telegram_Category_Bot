@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-import telegram.bot.telegram_tt.composite.CategoryComponent;
 import telegram.bot.telegram_tt.entity.Category;
 import telegram.bot.telegram_tt.repository.CategoryRepository;
 
@@ -15,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Сервис для загрузки категории из базы данных в формате Excel.
+ * Service for downloading categories from the database in Excel format.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,37 +24,37 @@ public class CategoryDownloadService {
     private static final Logger logger = LoggerFactory.getLogger(CategoryDownloadService.class);
 
     /**
-     * Создает Excel-файл с деревом категорий для заданного чата.
+     * Creates an Excel file with the category tree for a given chat.
      *
-     * Использует Template Pattern: определяет общий алгоритм создания файла
-     * (инициализация файла, добавление заголовков, запись данных, завершение).
+     * Uses the Template Pattern: defines a general algorithm for file creation
+     * (initialization, header addition, data writing, finalization).
      *
-     * @param chatId идентификатор чата
-     * @return байтовый массив, представляющий Excel-файл
-     * @throws IOException если возникнут проблемы при записи в файл
+     * @param chatId chat identifier
+     * @return byte array representing the Excel file
+     * @throws IOException if any issues occur during file writing
      */
     public byte[] createCategoryTreeExcel(Long chatId) throws IOException {
         logger.info("Starting to create category tree Excel for chatId: {}", chatId);
 
-        // Получаем все корневые категории для чата
+        // Get all root categories for the chat
         List<Category> rootCategories = categoryRepository.findByParentIsNullAndChatId(chatId);
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Category Tree");
             int[] rowIndex = {0};
 
-            // Шаг 1: Добавление заголовков — реализация инкапсулирована в createHeaderRow
+            // Step 1: Add headers — encapsulated in createHeaderRow
             createHeaderRow(sheet, rowIndex);
 
-            // Шаг 2: Запись данных — реализация инкапсулирована в writeCategoryToSheet
+            // Step 2: Write data — encapsulated in writeCategoryToSheet
             for (Category rootCategory : rootCategories) {
                 writeCategoryToSheet(rootCategory, sheet, rowIndex);
             }
 
-            // Шаг 3: Финальная обработка и запись в поток
-            sheet.autoSizeColumn(0);  // Автоматически изменяем ширину столбцов
+            // Step 3: Final processing and writing to stream
+            sheet.autoSizeColumn(0);  // Auto-adjust column width
             sheet.autoSizeColumn(1);
 
-            // Записываем данные в байтовый массив и возвращаем
+            // Write data to a byte array and return
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 workbook.write(outputStream);
                 logger.info("Category tree Excel file created successfully for chatId: {}", chatId);
@@ -63,18 +62,18 @@ public class CategoryDownloadService {
             }
         } catch (IOException e) {
             logger.error("Error occurred while creating Excel file for chatId: {}", chatId, e);
-            throw e; // Пробрасываем исключение дальше
+            throw e; // Re-throw the exception
         }
     }
 
     /**
-     * Создает строку с заголовками для Excel-листа.
+     * Creates a header row for the Excel sheet.
      *
-     * Использует Template Pattern: добавляет заголовки как фиксированную часть шаблона,
-     * которую можно модифицировать, если потребуется изменить формат заголовков.
+     * Uses the Template Pattern: adds headers as a fixed part of the template,
+     * which can be modified if the header format needs changes.
      *
-     * @param sheet лист, в который добавляются заголовки
-     * @param rowIndex индекс текущей строки
+     * @param sheet the sheet to add headers to
+     * @param rowIndex the current row index
      */
     private void createHeaderRow(Sheet sheet, int[] rowIndex) {
         Row headerRow = sheet.createRow(rowIndex[0]++);
@@ -83,7 +82,7 @@ public class CategoryDownloadService {
         font.setBold(true);
         headerStyle.setFont(font);
 
-        // Заголовки колонок
+        // Column headers
         String[] headers = {"Category", "Parent Category"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -93,22 +92,22 @@ public class CategoryDownloadService {
     }
 
     /**
-     * Рекурсивно записывает категорию и ее подкатегории в Excel.
+     * Recursively writes a category and its subcategories to the Excel sheet.
      *
-     * Использует Template Pattern: добавляет категории согласно иерархии,
-     * но логику рекурсивного вызова можно заменить, если структура категорий изменится.
+     * Uses the Template Pattern: adds categories according to the hierarchy,
+     * but the recursive logic can be replaced if the category structure changes.
      *
-     * @param category категория для записи
-     * @param sheet лист, в который записывается категория
-     * @param rowIndex индекс текущей строки
+     * @param category the category to write
+     * @param sheet the sheet to write the category to
+     * @param rowIndex the current row index
      */
-    private void writeCategoryToSheet(CategoryComponent category, Sheet sheet, int[] rowIndex) {
+    private void writeCategoryToSheet(Category category, Sheet sheet, int[] rowIndex) {
         Row row = sheet.createRow(rowIndex[0]++);
         row.createCell(0).setCellValue(category.getName());
         row.createCell(1).setCellValue(category.getParent() != null ? category.getParent().getName() : "-");
 
-        // Рекурсивный вызов для записи дочерних категорий
-        for (CategoryComponent child : category.getChildren()) {
+        // Composite Pattern: recursive traversal of subcategories (tree)
+        for (Category child : category.getChildren()) {
             writeCategoryToSheet(child, sheet, rowIndex);
         }
     }

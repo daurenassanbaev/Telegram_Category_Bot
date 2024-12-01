@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 
-// Здесь используется Facade Pattern
+// Facade Pattern is used here
 @Component
 @RequiredArgsConstructor
 public class CategoryFacade {
@@ -19,79 +19,78 @@ public class CategoryFacade {
     private final CategoryUploadService categoryUploadService;
 
     /**
-     * Добавление корневой категории.
+     * Adds a root category.
      *
-     * @param name имя категории
-     * @param chatId идентификатор чата
-     * @return сообщение о результате
+     * @param name   the name of the category
+     * @param chatId the chat identifier
+     * @return a message indicating the result
      */
     public String addRootCategory(String name, Long chatId) {
         return categoryService.addRootCategory(name, chatId);
     }
 
     /**
-     * Добавление дочерней категории.
+     * Adds a child category under a parent category.
      *
-     * @param parentName имя родительской категории
-     * @param childName имя дочерней категории
-     * @param chatId идентификатор чата
-     * @return сообщение о результате
+     * @param parentName the name of the parent category
+     * @param childName  the name of the child category
+     * @param chatId     the chat identifier
+     * @return a message indicating the result
      */
     public String addChildCategory(String parentName, String childName, Long chatId) {
         return categoryService.addChildCategory(parentName, childName, chatId);
     }
 
     /**
-     * Удаление категории.
+     * Removes a category.
      *
-     * @param name имя категории
-     * @param chatId идентификатор чата
-     * @return сообщение о результате
+     * @param name   the name of the category
+     * @param chatId the chat identifier
+     * @return a message indicating the result
      */
     public String removeCategory(String name, Long chatId) {
         return categoryService.removeCategory(name, chatId);
     }
 
     /**
-     * Просмотр дерева категорий.
+     * Views the category tree.
      *
-     * @param chatId идентификатор чата
-     * @return дерево категорий в виде строки
+     * @param chatId the chat identifier
+     * @return a string representing the category tree
      */
     public String viewCategoryTree(Long chatId) {
         return categoryService.viewCategoryTree(chatId);
     }
 
     /**
-     * Проверка существования категории.
+     * Checks if a category exists.
      *
-     * @param name  имя категории
-     * @param chatId идентификатор чата
-     * @return true, если категория существует, иначе false
+     * @param name   the name of the category
+     * @param chatId the chat identifier
+     * @return true if the category exists, otherwise false
      */
     public boolean categoryExists(String name, Long chatId) {
         return categoryService.categoryExists(name, chatId);
     }
 
     /**
-     * Создает Excel-файл с деревом категорий для заданного чата.
+     * Creates an Excel file with the category tree for the given chat.
      *
-     * @param chatId идентификатор чата
-     * @return байтовый массив, представляющий Excel-файл
-     * @throws IOException если возникнут проблемы при записи в файл
+     * @param chatId the chat identifier
+     * @return a byte array representing the Excel file
+     * @throws IOException if there are issues writing the file
      */
     public byte[] createCategoryTreeExcel(Long chatId) throws IOException {
         return categoryDownloadService.createCategoryTreeExcel(chatId);
     }
 
-    // Извлекаем категории из Excel файла
+    // Extract categories from the Excel file
     public LinkedHashMap<String, String> getCategoriesFromExcelFile(InputStream inputStream) {
         return categoryUploadService.getCategoriesFromExcelFile(inputStream);
     }
 
-    // Добавляем все категории из Excel файла в базу данных
+    // Adds all categories from the Excel file to the database
     public String addAllCategories(LinkedHashMap<String, String> map, Long chatId) {
         return categoryUploadService.addAllCategories(map, chatId);
     }
 }
-

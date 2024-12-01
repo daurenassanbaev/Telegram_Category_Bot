@@ -8,27 +8,27 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Репозиторий для работы с сущностью Category.
- * Содержит методы для поиска категорий по различным критериям.
+ * Repository for working with the Category entity.
+ * Contains methods for searching categories by various criteria.
  */
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     /**
-     * Метод для поиска категории по имени и идентификатору чата.
+     * Method to find category by name and chat ID.
      *
-     * @param name имя категории
-     * @param chatId идентификатор чата
-     * @return Optional<Category> - категория, если найдена
+     * @param name category name
+     * @param chatId chat ID
+     * @return Optional<Category> - category if found
      */
     Optional<Category> findByNameAndChatId(String name, Long chatId);
 
     /**
-     * Метод для получения всех корневых категорий для заданного чата.
-     * Корневые категории - те, у которых нет родительской категории.
+     * Method to get all root categories for a given chat.
+     * Root categories are those that do not have a parent category.
      *
-     * @param chatId идентификатор чата
-     * @return List<Category> - список корневых категорий
+     * @param chatId chat ID
+     * @return List<Category> - list of root categories
      */
     List<Category> findByParentIsNullAndChatId(Long chatId);
 }

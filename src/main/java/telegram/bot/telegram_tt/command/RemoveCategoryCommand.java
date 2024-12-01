@@ -7,7 +7,7 @@ import telegram.bot.telegram_tt.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Команда для удаления категории из базы данных.
+ * Command to remove a category from the database.
  */
 @Component
 @RequiredArgsConstructor
@@ -17,11 +17,11 @@ public class RemoveCategoryCommand implements Command {
     private final CategoryFacade categoryFacade;
 
     /**
-     * Выполняет команду удаления категории.
+     * Executes the command to remove a category.
      *
-     * @param command полный текст команды
-     * @param chatId идентификатор чата пользователя
-     * @return ответное сообщение, указывающее на успех или неудачу
+     * @param command the full text of the command
+     * @param chatId the user's chat ID
+     * @return a response message indicating success or failure
      */
     @Override
     public String execute(String command, Long chatId) {
@@ -29,17 +29,17 @@ public class RemoveCategoryCommand implements Command {
 
         String[] args = command.split(" ");
         if (args.length >= 2) {
-            // Формируем строку для удаления категории, начиная с первого элемента после команды
+            // Build the category name string to be removed, starting with the first element after the command
             StringBuilder forRemove = new StringBuilder(args[1].trim());
             forRemove.append(" ");
 
-            // Добавляем оставшиеся элементы к строке для удаления
+            // Add the remaining elements to the category string for removal
             for (int i = 2; i < args.length; i++) {
                 String element = args[i].trim();
                 forRemove.append(element).append(" ");
             }
 
-            // Выполняем удаление категории
+            // Execute the category removal
             log.debug("Category to be removed: {}", forRemove.toString().trim());
             String response = categoryFacade.removeCategory(forRemove.toString().trim(), chatId);
             log.info("Remove category response: {}", response);
