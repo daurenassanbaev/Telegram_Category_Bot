@@ -2,6 +2,7 @@ package telegram.bot.telegram_tt.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import telegram.bot.telegram_tt.facade.CategoryFacade;
 import telegram.bot.telegram_tt.service.CategoryUploadService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +17,7 @@ import java.util.LinkedHashMap;
 @Slf4j
 public class UploadCommand implements FileCommand {
 
-    private final CategoryUploadService categoryUploadService;
+    private final CategoryFacade categoryFacade;
 
     /**
      * Выполняет команду загрузки категорий из файла.
@@ -31,11 +32,11 @@ public class UploadCommand implements FileCommand {
         log.info("Executing upload command for chat ID: {}", chatId);
 
         // Получаем категории из загруженного Excel файла
-        LinkedHashMap<String, String> map = categoryUploadService.getCategoriesFromExcelFile(inputStream);
+        LinkedHashMap<String, String> map = categoryFacade.getCategoriesFromExcelFile(inputStream);
         log.debug("Categories loaded from file: {}", map);
 
         // Добавляем все категории в базу данных
-        String response = categoryUploadService.addAllCategories(map, chatId);
+        String response = categoryFacade.addAllCategories(map, chatId);
         log.info("Categories successfully uploaded for chat ID: {}", chatId);
         return response;
     }

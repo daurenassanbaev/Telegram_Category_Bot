@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import telegram.bot.telegram_tt.composite.CategoryComponent;
 import telegram.bot.telegram_tt.entity.Category;
 import telegram.bot.telegram_tt.repository.CategoryRepository;
 
@@ -26,6 +27,9 @@ public class CategoryDownloadService {
     /**
      * Создает Excel-файл с деревом категорий для заданного чата.
      *
+     * Использует Template Pattern: определяет общий алгоритм создания файла
+     * (инициализация файла, добавление заголовков, запись данных, завершение).
+     *
      * @param chatId идентификатор чата
      * @return байтовый массив, представляющий Excel-файл
      * @throws IOException если возникнут проблемы при записи в файл
@@ -38,13 +42,16 @@ public class CategoryDownloadService {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Category Tree");
             int[] rowIndex = {0};
-            createHeaderRow(sheet, rowIndex); // Добавляем заголовок в таблицу
 
-            // Записываем категории в файл
+            // Шаг 1: Добавление заголовков — реализация инкапсулирована в createHeaderRow
+            createHeaderRow(sheet, rowIndex);
+
+            // Шаг 2: Запись данных — реализация инкапсулирована в writeCategoryToSheet
             for (Category rootCategory : rootCategories) {
                 writeCategoryToSheet(rootCategory, sheet, rowIndex);
             }
 
+            // Шаг 3: Финальная обработка и запись в поток
             sheet.autoSizeColumn(0);  // Автоматически изменяем ширину столбцов
             sheet.autoSizeColumn(1);
 
@@ -62,6 +69,9 @@ public class CategoryDownloadService {
 
     /**
      * Создает строку с заголовками для Excel-листа.
+     *
+     * Использует Template Pattern: добавляет заголовки как фиксированную часть шаблона,
+     * которую можно модифицировать, если потребуется изменить формат заголовков.
      *
      * @param sheet лист, в который добавляются заголовки
      * @param rowIndex индекс текущей строки
@@ -85,17 +95,20 @@ public class CategoryDownloadService {
     /**
      * Рекурсивно записывает категорию и ее подкатегории в Excel.
      *
+     * Использует Template Pattern: добавляет категории согласно иерархии,
+     * но логику рекурсивного вызова можно заменить, если структура категорий изменится.
+     *
      * @param category категория для записи
      * @param sheet лист, в который записывается категория
      * @param rowIndex индекс текущей строки
      */
-    private void writeCategoryToSheet(Category category, Sheet sheet, int[] rowIndex) {
+    private void writeCategoryToSheet(CategoryComponent category, Sheet sheet, int[] rowIndex) {
         Row row = sheet.createRow(rowIndex[0]++);
         row.createCell(0).setCellValue(category.getName());
         row.createCell(1).setCellValue(category.getParent() != null ? category.getParent().getName() : "-");
 
         // Рекурсивный вызов для записи дочерних категорий
-        for (Category child : category.getChildren()) {
+        for (CategoryComponent child : category.getChildren()) {
             writeCategoryToSheet(child, sheet, rowIndex);
         }
     }

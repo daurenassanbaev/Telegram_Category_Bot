@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import telegram.bot.telegram_tt.command.*;
+import telegram.bot.telegram_tt.factory.CommandResponseFactory;
 import telegram.bot.telegram_tt.service.CategoryDownloadService;
 import telegram.bot.telegram_tt.service.CategoryUploadService;
 
@@ -32,47 +33,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private final String botName;
     private final Map<String, Command> commands = new HashMap<>();
+    private final CommandResponseFactory commandResponseFactory;
 
-    private static final String RULES = """
-            Команды:
-            
-            1) /viewTree - 📜 Показать текущее дерево категорий в структурированном формате.
-            
-            2) /addElement <название элемента> - ➕ Добавить элемент как корневой, если у него нет родителя.
-            
-            3) /addElement <родительский элемент> <дочерний элемент> - ➕ Добавить дочерний элемент к существующему родителю. Если родителя нет, будет показано сообщение об ошибке.
-            
-            4) /removeElement <название элемента> - 🗑️ Удалить указанный элемент и все его дочерние элементы. Если элемент не найден, будет показано сообщение об ошибке.
-            
-            5) /help - ℹ️ Показать список команд и их описание.
-            
-            6) /download - 📥 Скачать документ Excel с деревом категорий.
-            
-            7) /upload - 📤 Загрузить документ Excel с деревом категорий и сохранить все элементы в базе данных.
-            """;
-
-    private static final String START_MESSAGE = """
-            Добро пожаловать в Category Bot! 👋
-            Этот бот позволяет создавать, просматривать и удалять дерево категорий.
-            Напишите "/help", чтобы узнать, какие команды доступны.
-            """;
-
-    private static final String UNKNOWN_COMMAND = "❌ Неизвестная команда. Напишите /help, чтобы увидеть доступные команды.";
-
-    private static final String UPLOAD_MESSAGE = """
-            ⚠️ При отправке убедитесь, что объекты уникальны. В колонке "Категория" не должно быть дубликатов. Формат листа должен быть, как на фотках.(2 фото означает, что имя таблицы должна быть "Category Tree") :
-            
-            "-" - означает отсутствие родительской категории.
-            
-            Пожалуйста, отправьте ваш файл, я с удовольствием обработаю его 😊
-            """;
     @Value("${images.first}")
     private String PHOTO_PATH;
     @Value("${images.second}")
     private String PHOTO_PATH_1;
     private final Set<Long> waiting = new HashSet<>();
 
-    public TelegramBot(String botName, String token, AddCategoryCommand addCategoryCommand, ViewCategoryCommand viewCategoryCommand, RemoveCategoryCommand removeCategoryCommand, UploadCommand uploadCommand, DownloadCommand downloadCommand, CategoryDownloadService categoryDownloadService, CategoryUploadService categoryUploadService) {
+    public TelegramBot(String botName, String token, AddCategoryCommand addCategoryCommand, ViewCategoryCommand viewCategoryCommand, RemoveCategoryCommand removeCategoryCommand, UploadCommand uploadCommand, DownloadCommand downloadCommand, CategoryDownloadService categoryDownloadService, CategoryUploadService categoryUploadService, CommandResponseFactory commandResponseFactory) {
         super(token);
         this.botName = botName;
         commands.put("/addElement", addCategoryCommand);
@@ -80,6 +49,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         commands.put("/removeElement", removeCategoryCommand);
         commands.put("/download", downloadCommand);
         commands.put("/upload", uploadCommand);
+        this.commandResponseFactory = commandResponseFactory;
     }
 
     @Override
@@ -92,11 +62,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String response = "";
                 // Обрабатываем команду help
                 if (messageText.equals("/help")) {
-                    response = RULES;
+                    response = commandResponseFactory.createResponse(messageText);
                 } else if (messageText.equals("/start")) {
-                    response = START_MESSAGE;
+                    response = commandResponseFactory.createResponse(messageText);
                 } else if (messageText.equals("/upload")) {
-                    response = UPLOAD_MESSAGE;
+                    response = commandResponseFactory.createResponse(messageText);
                     waiting.add(chatId); // Ожидаем загрузку файла от пользователя
                 } else {
                     // Обработка других команд
@@ -175,7 +145,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
             }
         }
-        return UNKNOWN_COMMAND;
+        return commandResponseFactory.createResponse(messageText);
     }
 
 
@@ -191,7 +161,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
         try {
-            if (text.equals(UPLOAD_MESSAGE)) {
+            if (text.equals("/upload")) {
                 sendPhoto(chatId, PHOTO_PATH); // Отправляем фото для загрузки
                 sendPhoto(chatId, PHOTO_PATH_1);
             }

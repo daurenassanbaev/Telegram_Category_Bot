@@ -63,6 +63,7 @@ public class CategoryUploadService {
     }
 
     // Добавляем все категории из Excel файла в базу данных
+    // Тут использовался composite pattern в  addAllCategories
     public String addAllCategories(LinkedHashMap<String, String> categories, Long chatId) {
         for (Map.Entry<String, String> element : categories.entrySet()) {
             String category = element.getKey();
@@ -73,17 +74,19 @@ public class CategoryUploadService {
             if (categoryOptional.isEmpty()) {
                 if (parentCategory.equals("-")) {
                     // Если родительская категория не указана, создаем корневую категорию
-                    Category category1 = new Category();
-                    category1.setName(category);
-                    category1.setChatId(chatId);
+                    Category category1 = Category.builder()
+                            .name(category)
+                            .chatId(chatId)
+                            .build();
                     categoryRepository.save(category1);
                     continue;
                 }
 
                 // Создаем категорию и связываем ее с родительской категорией
-                Category categoryToSave = new Category();
-                categoryToSave.setName(category);
-                categoryToSave.setChatId(chatId);
+                Category categoryToSave = Category.builder()
+                        .name(category)
+                        .chatId(chatId)
+                        .build();
                 Category resultCategory = categoryRepository.save(categoryToSave);
                 Optional<Category> parentOptional = categoryRepository.findByNameAndChatId(parentCategory, chatId);
                 Category parentCategoryToEdit;
@@ -93,17 +96,19 @@ public class CategoryUploadService {
                     resultCategory = categoryRepository.save(categoryToSave);
                     parentCategoryToEdit = parentOptional.get();
                     resultCategory.setParent(parentCategoryToEdit);
-                    parentCategoryToEdit.getChildren().add(resultCategory);
+                    parentCategoryToEdit.addChild(resultCategory);
                     categoryRepository.save(resultCategory);
                     categoryRepository.save(parentCategoryToEdit);
                 } else {
                     // Если родительской категории нет, создаем ее
-                    parentCategoryToEdit = new Category();
-                    parentCategoryToEdit.setName(parentCategory);
-                    parentCategoryToEdit.setChatId(chatId);
+                    parentCategoryToEdit = Category.builder()
+                            .name(parentCategory)
+                            .chatId(chatId)
+                            .build();
                     Category result = categoryRepository.save(parentCategoryToEdit);
                     resultCategory.setParent(result);
-                    result.getChildren().add(resultCategory);
+                    // composite pattern
+                    result.addChild(resultCategory);
                     categoryRepository.save(resultCategory);
                     categoryRepository.save(result);
                 }
@@ -117,11 +122,13 @@ public class CategoryUploadService {
                 Optional<Category> parentCategoryOpt = categoryRepository.findByNameAndChatId(parentCategory, chatId);
                 if (parentCategoryOpt.isEmpty()) {
                     // Если родительской категории нет, создаем ее и связываем с дочерней категорией
-                    Category toSaveParentCategory = new Category();
-                    toSaveParentCategory.setName(parentCategory);
-                    toSaveParentCategory.setChatId(chatId);
+                    Category toSaveParentCategory = Category.builder()
+                            .name(parentCategory)
+                            .chatId(chatId)
+                            .build();
                     Category savedParentCategory = categoryRepository.save(toSaveParentCategory);
-                    savedParentCategory.getChildren().add(childCategory);
+                    // composite pattern
+                    savedParentCategory.addChild(childCategory);
                     childCategory.setParent(savedParentCategory);
                     categoryRepository.save(childCategory);
                     categoryRepository.save(toSaveParentCategory);

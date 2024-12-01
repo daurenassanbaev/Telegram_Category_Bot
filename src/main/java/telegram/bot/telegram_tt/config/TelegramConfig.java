@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import telegram.bot.telegram_tt.bot.TelegramBot;
 import telegram.bot.telegram_tt.command.*;
+import telegram.bot.telegram_tt.factory.DefaultCommandResponseFactory;
 import telegram.bot.telegram_tt.service.CategoryDownloadService;
 import telegram.bot.telegram_tt.service.CategoryUploadService;
 
@@ -42,13 +43,14 @@ public class TelegramConfig {
                                    UploadCommand uploadCommand,
                                    DownloadCommand downloadCommand,
                                    CategoryDownloadService categoryDownloadService,
-                                   CategoryUploadService categoryUploadService) {
+                                   CategoryUploadService categoryUploadService,
+                                   DefaultCommandResponseFactory defaultCommandResponseFactory) {
         log.info("Initializing Telegram bot with name: {}", botName);
 
         // Создание экземпляра бота с необходимыми командами и сервисами
         TelegramBot telegramBot = new TelegramBot(botName, token, addCategoryCommand, viewCategoryCommand,
                 removeCategoryCommand, uploadCommand, downloadCommand,
-                categoryDownloadService, categoryUploadService);
+                categoryDownloadService, categoryUploadService, defaultCommandResponseFactory);
 
         try {
             // Регистрация бота в Telegram API

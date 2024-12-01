@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import telegram.bot.telegram_tt.facade.CategoryFacade;
 import telegram.bot.telegram_tt.service.CategoryDownloadService;
 
 import java.io.ByteArrayInputStream;
@@ -18,7 +19,7 @@ import java.io.IOException;
 @Slf4j
 public class DownloadCommand implements Command {
 
-    private final CategoryDownloadService categoryDownloadService;
+    private final CategoryFacade categoryFacade;
 
     /**
      * Выполняет команду загрузки категорий.
@@ -38,7 +39,7 @@ public class DownloadCommand implements Command {
             log.debug("Attempting to create the Excel file for chat ID: {}", chatId);
 
             // Создаем файл Excel с категориями с помощью сервиса
-            byte[] excelFile = categoryDownloadService.createCategoryTreeExcel(chatId);
+            byte[] excelFile = categoryFacade.createCategoryTreeExcel(chatId);
 
             // Преобразуем массив байтов в InputStream для документа
             ByteArrayInputStream inputStream = new ByteArrayInputStream(excelFile);

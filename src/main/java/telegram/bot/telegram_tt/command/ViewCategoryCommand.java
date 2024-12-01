@@ -2,6 +2,7 @@ package telegram.bot.telegram_tt.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import telegram.bot.telegram_tt.facade.CategoryFacade;
 import telegram.bot.telegram_tt.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ViewCategoryCommand implements Command {
 
-    private final CategoryService categoryService;
+    private final CategoryFacade categoryFacade;
 
     /**
      * Выполняет команду для просмотра всех категорий.
@@ -27,7 +28,7 @@ public class ViewCategoryCommand implements Command {
         log.info("Executing View Category Command for chat ID: {}", chatId);
 
         // Получаем категории в виде дерева
-        String categoryTree = categoryService.viewCategoryTree(chatId);
+        String categoryTree = categoryFacade.viewCategoryTree(chatId);
         log.debug("Category tree fetched for chat ID {}: {}", chatId, categoryTree);
 
         return categoryTree;

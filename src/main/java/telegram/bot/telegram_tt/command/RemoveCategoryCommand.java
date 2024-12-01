@@ -2,6 +2,7 @@ package telegram.bot.telegram_tt.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import telegram.bot.telegram_tt.facade.CategoryFacade;
 import telegram.bot.telegram_tt.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RemoveCategoryCommand implements Command {
 
-    private final CategoryService categoryService;
+    private final CategoryFacade categoryFacade;
 
     /**
      * Выполняет команду удаления категории.
@@ -40,7 +41,7 @@ public class RemoveCategoryCommand implements Command {
 
             // Выполняем удаление категории
             log.debug("Category to be removed: {}", forRemove.toString().trim());
-            String response = categoryService.removeCategory(forRemove.toString().trim(), chatId);
+            String response = categoryFacade.removeCategory(forRemove.toString().trim(), chatId);
             log.info("Remove category response: {}", response);
             return response;
         } else {

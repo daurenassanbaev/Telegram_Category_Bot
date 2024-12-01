@@ -52,10 +52,10 @@ public class CategoryServiceImpl implements CategoryService {
      * @return новая категория
      */
     public Category createCategory(String name, Long chatId) {
-        Category category = new Category();
-        category.setName(name);
-        category.setChatId(chatId);
-        return category;
+        return Category.builder()
+                .name(name)
+                .chatId(chatId)
+                .build();
     }
 
     /**
